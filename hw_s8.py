@@ -1,77 +1,85 @@
-from random import *
 import json
 
-films = []
+# Загрузка данных из Json-файла
+def load_data(filename):
+    try:
+        with open(filename, "r") as file:
+            data = json.load(file)
+        return data
+    except FileNotFoundError:
+        return {}
 
-def save():
-    with open("films.json", "w", encoding = "utf-8") as fh:
-        fh.write(json.dumps(films, ensure_ascii = False))
-        print("Успешное сохранение в файле films.json")
 
-def load():
-    with open("films.json", "r", encoding = "utf-8") as fh: #ключ r - read
-        films = json.load(fh)
-    print("Успешное загрузка из файла films.json")
+# Сохранение данных в Json-файл
+def save_data(data, filename):
+    with open(filename, "w") as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
 
-try:
-    with open("films.json", "r", encoding = "utf-8") as fh: #ключ r - read
-        films = json.load(fh)
-    print("Успешное загрузка из файла films.json")
-    #load(films.json)
-except:
-    films.append('matrica')
-    films.append('kingdoom')
-    films.append('elektronik')
-    films.append('viy')
-    films.append('office')
 
-while True:
-    command = input("введите команду: ")
-    if command == "/start":
-        print('Бот начал свою работу')
+# Основная функция
+def main():
+    filename = "phonebook.json"
+    phonebook = load_data(filename)
 
-    elif command == "/stop":
-        print("Бот завершил работу.")
-        save()
-        break
+    while True:
+        print()
+        print("Телефонный справочник")
+        print("1. Просмотр всех записей справочника")
+        print("2. Добавление нового контакта")
+        print("3. Поиск контакта по имени")
+        print("4. Удаление контакта")
+        print("5. Сохранение контакта")
+        print("6. Выход из программы")
 
-    elif command == "/show_all":
-        print("текущий список фильмов:")
-        print(films)
+        choice = input("Выберите номер нужного действия: ")
+        print()
 
-    elif command == "/add":
-        f = input("введите название фильмa: ")
-        films.append(f)
-        print("фильм добавлен")
+        if choice == "1":
+            for name, contact in phonebook.items():
+                print(f"Имя: {name}")
+                print(f"Телефоны: {contact['Phone']}")
+                print(f"День рождения: {contact['birthday']}")
+                print(f"e-mail: {contact['e-mail']}")
+                print("-" * 40)
 
-    elif command == "/help":
-        print("показали мануал")
+        elif choice == "2":
+            name = input("Введите имя: ")
+            phone = input("Введите номер телефона: ")
+            birthday = input("Введите день рождения: ")
+            email = input("Введите e-mail: ")
 
-    elif command == "/del":
-        f = input("введите название фильмa для его удаления: ")
-        """
-        if f in films:  # первый способ
-            films.remove(f)
-            print("фильм удален")
-        else:
-            print("такого фильма в коллекции нет")
-        """   
-        try:  # второй способ
-            films.remove(f)
-            print("фильм удален")
-        except:
-            print("такого фильма в коллекции нет")  
+            phonebook[name] = {"Phone": phone, "birthday": birthday, "e-mail": email}
+            save_data(phonebook, filename)
+            print(f"Контакт {name} успешно добавлен и сохранен.")
 
-    elif command == "/random":
-        # rnd = randint(0, len(films) - 1)  # 1 sposob
-        # print("Рекомендуемый фильм: " + films[rnd])     
-        print("Рекомендуемый фильм: " + choice(films))  # 2 sposob
+        elif choice == "3":
+            search_name = input("Введите имя для поиска: ")
+            if search_name in phonebook:
+                print("Найдено:")
+                contact = phonebook[search_name]
+                print(f"Имя: {search_name}")
+                print(f"Телефоны: {', '.join(contact['Phone'])}")
+                print(f"День рождения: {contact['birthday']}")
+                print(f"e-mail: {contact['e-mail']}")
+            else:
+                print("Контакт не найден.")
 
-    elif command == "/save":
-        save()
+        elif choice == "4":
+            delete_name = input("Введите имя для удаления: ")
+            if delete_name in phonebook:
+                del phonebook[delete_name]
+                print("Контакт удален.")
+                save_data(phonebook, filename)
+            else:
+                print("Контакт не найден.")
 
-    elif command == "/load":
-        load()
+        elif choice == "5":
+            save_data(phonebook, filename)
+            print("Данные сохранены.")
 
-    else:
-        print("неизвестная команда. изучите мануал по команде /help")
+        elif choice == "6":
+            save_data(phonebook, filename)
+            print("Данные сохранены. Программа завершена.")
+            break
+
+main()
